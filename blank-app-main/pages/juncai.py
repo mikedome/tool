@@ -204,14 +204,14 @@ def show():
     st.header("军采项目工具")
     
     # 使用选项卡布局
-    tab1, tab2, tab3, tab4 = st.tabs(["一键更新", "启动程序", "链接解析", "API调用"])
+    tabs = st.tabs(["一键更新", "启动程序", "链接解析", "API调用"])
     
     # 选项卡1：一键更新
-    with tab1:
+    with tabs[0]:
         auto_update()
     
     # 选项卡2：启动程序
-    with tab2:
+    with tabs[1]:
         st.subheader("启动后羿采集器")
         
         # 程序路径配置
@@ -238,7 +238,7 @@ def show():
                 st.error(f"启动程序时出错: {str(e)}")
     
     # 选项卡3：链接解析
-    with tab3:
+    with tabs[2]:
         st.subheader("链接解析")
         
         # 添加CSV文件上传功能
@@ -305,7 +305,7 @@ def show():
                 st.warning("请输入需要解析的链接")
     
     # 选项卡4：API调用
-    with tab4:
+    with tabs[3]:
         st.subheader("中标公司名称提取(95%准确)")
         
         # API配置
