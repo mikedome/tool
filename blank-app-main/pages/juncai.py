@@ -8,6 +8,8 @@ import chardet
 import time
 import subprocess
 from typing import List, Dict
+from utils.common import read_file, save_dataframe
+from utils.components import file_uploader_with_preview
 
 # ====================== 规则提取模块 ======================
 class CompanyExtractor:
@@ -95,14 +97,121 @@ def find_url_column(df):
     
     return url_columns
 
+def auto_update():
+    """一键更新军采数据流程"""
+    st.subheader("军采数据一键更新")
+    
+    # 1. 上传新数据和历史数据
+    col1, col2 = st.columns(2)
+    with col1:
+        new_file = st.file_uploader("上传新采集的数据", type=['csv'], key="new_data")
+    with col2:
+        history_file = st.file_uploader("上传历史数据(可选)", type=['csv'], key="history_data")
+    
+    if st.button("开始更新", key="start_update"):
+        if not new_file:
+            st.error("请上传新采集的数据文件")
+            return
+            
+        with st.spinner("正在处理..."):
+            try:
+                # 读取新数据
+                new_df = pd.read_csv(new_file)
+                st.info(f"新数据包含 {len(new_df)} 条记录")
+                
+                # 2. 链接爬取
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                
+                # 获取未爬取的链接
+                empty_content = new_df[new_df['内容'].isna() | (new_df['内容'] == '')]
+                total_links = len(empty_content)
+                
+                if total_links > 0:
+                    st.warning(f"发现 {total_links} 个未爬取的链接")
+                    
+                    # 爬取进度跟踪
+                    processed = 0
+                    while True:
+                        empty_content = new_df[new_df['内容'].isna() | (new_df['内容'] == '')]
+                        if len(empty_content) == 0:
+                            break
+                            
+                        for idx, row in empty_content.iterrows():
+                            try:
+                                # 这里调用您的链接爬取函数
+                                # content = crawl_link(row['标题链接'])
+                                # new_df.at[idx, '内容'] = content
+                                
+                                processed += 1
+                                progress = processed / total_links
+                                progress_bar.progress(progress)
+                                status_text.text(f"已处理: {processed}/{total_links}")
+                                
+                                # 每10条保存一次
+                                if processed % 10 == 0:
+                                    temp_file = save_dataframe(new_df, "temp_crawled.csv")
+                                    st.info(f"已保存临时文件: {temp_file}")
+                                
+                            except Exception as e:
+                                st.error(f"处理链接失败: {row['标题链接']}, 错误: {str(e)}")
+                                continue
+                            
+                        time.sleep(1)  # 避免请求过快
+                
+                # 3. 合并历史数据
+                if history_file:
+                    history_df = pd.read_csv(history_file)
+                    st.info(f"历史数据包含 {len(history_df)} 条记录")
+                    
+                    # 合并数据
+                    merged_df = pd.concat([history_df, new_df], ignore_index=True)
+                    st.success(f"合并后共 {len(merged_df)} 条记录")
+                    
+                    # 4. 全字段去重
+                    dedup_df = merged_df.drop_duplicates()
+                    removed = len(merged_df) - len(dedup_df)
+                    st.success(f"去重完成，删除了 {removed} 条重复记录")
+                    
+                    # 保存结果
+                    final_file = save_dataframe(dedup_df, "updated_data.csv")
+                    st.success(f"更新完成！结果已保存至: {final_file}")
+                    
+                    # 下载按钮
+                    st.download_button(
+                        label="下载更新后的数据",
+                        data=dedup_df.to_csv(index=False),
+                        file_name="updated_data.csv",
+                        mime="text/csv"
+                    )
+                else:
+                    # 如果没有历史数据，直接保存新数据
+                    final_file = save_dataframe(new_df, "new_data.csv")
+                    st.success(f"处理完成！结果已保存至: {final_file}")
+                    
+                    # 下载按钮
+                    st.download_button(
+                        label="下载处理后的数据",
+                        data=new_df.to_csv(index=False),
+                        file_name="new_data.csv",
+                        mime="text/csv"
+                    )
+                    
+            except Exception as e:
+                st.error(f"处理过程中出错: {str(e)}")
+
 def show():
     st.header("军采项目工具")
     
     # 使用选项卡布局
-    tab1, tab2, tab3 = st.tabs(["启动程序", "链接解析", "API调用"])
+    tab1, tab2, tab3, tab4 = st.tabs(["一键更新", "启动程序", "链接解析", "API调用"])
     
-    # 选项卡1：启动程序
+    # 选项卡1：一键更新
     with tab1:
+        auto_update()
+    
+    # 选项卡2：启动程序
+    with tab2:
         st.subheader("启动后羿采集器")
         
         # 程序路径配置
@@ -128,8 +237,8 @@ def show():
             except Exception as e:
                 st.error(f"启动程序时出错: {str(e)}")
     
-    # 选项卡2：链接解析
-    with tab2:
+    # 选项卡3：链接解析
+    with tab3:
         st.subheader("链接解析")
         
         # 添加CSV文件上传功能
@@ -195,8 +304,8 @@ def show():
             else:
                 st.warning("请输入需要解析的链接")
     
-    # 选项卡3：API调用
-    with tab3:
+    # 选项卡4：API调用
+    with tab4:
         st.subheader("中标公司名称提取(95%准确)")
         
         # API配置
