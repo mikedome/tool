@@ -16,6 +16,16 @@ def init_page():
         initial_sidebar_state="expanded"
     )
     
+    # 隐藏默认的页面导航菜单
+    hide_streamlit_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        div[data-testid="stSidebarNav"] {display: none;}
+        footer {visibility: hidden;}
+        </style>
+    """
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+    
     # 设置调试模式
     if 'debug' not in st.session_state:
         st.session_state.debug = os.getenv('DEBUG', 'False').lower() == 'true'
@@ -26,10 +36,13 @@ def main():
     st.title("Ethan的工具集")
     
     # 侧边栏导航
-    page = st.sidebar.selectbox(
-        "选择功能",
-        ["军采项目", "拆分 CSV", "合并 CSV", "CSV 去重", "格式转换", "筛选导出"]
-    )
+    with st.sidebar:
+        st.title("功能选择")
+        page = st.selectbox(
+            "选择功能",
+            ["军采项目", "拆分 CSV", "合并 CSV", "CSV 去重", "格式转换", "筛选导出"],
+            format_func=lambda x: x  # 保持中文显示
+        )
     
     # 页面路由
     pages = {
