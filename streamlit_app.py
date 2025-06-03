@@ -11,7 +11,7 @@ load_dotenv()
 # 设置页面配置
 def init_page():
     st.set_page_config(
-        page_title="数据处理工具集",
+        page_title="Ethan的工具集",
         page_icon="📊",
         layout="wide",
         initial_sidebar_state="expanded"
@@ -34,7 +34,6 @@ def init_page():
 @handle_errors
 def main():
     init_page()
-    st.title("Ethan的工具集")
     
     # 添加GitHub同步按钮
     with st.sidebar:
@@ -43,25 +42,38 @@ def main():
             with st.spinner('正在同步文件...'):
                 sync_all_files_to_github()
         
+        # 修改选择功能的顺序，确保政策申报显示在正确位置
         page = st.selectbox(
             "选择功能",
-            ["军采项目", "政策申报", "拆分 CSV", "合并 CSV", "CSV 去重", "格式转换", "筛选导出"],
-            format_func=lambda x: x
+            [
+                "军采项目",
+                "政策申报",  # 确保这个选项存在
+                "拆分 CSV",
+                "合并 CSV",
+                "CSV 去重",
+                "格式转换",
+                "筛选导出"
+            ]
         )
     
-    # 页面路由
-    pages = {
-        "军采项目": juncai.show,
-        "政策申报": policy.show,
-        "拆分 CSV": split.show,
-        "合并 CSV": merge.show,
-        "CSV 去重": deduplicate.show,
-        "格式转换": convert.show,
-        "筛选导出": filter.show
-    }
+    # 页面标题
+    st.title("Ethan的工具集")
     
-    if page in pages:
-        pages[page]()
+    # 页面路由
+    if page == "政策申报":
+        policy.show()
+    elif page == "军采项目":
+        juncai.show()
+    elif page == "拆分 CSV":
+        split.show()
+    elif page == "合并 CSV":
+        merge.show()
+    elif page == "CSV 去重":
+        deduplicate.show()
+    elif page == "格式转换":
+        convert.show()
+    elif page == "筛选导出":
+        filter.show()
 
 if __name__ == "__main__":
     main() 
