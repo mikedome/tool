@@ -1,0 +1,9 @@
+streamlit>=1.24.0
+pandas>=1.5.3
+openpyxl>=3.1.2
+chardet>=4.0.0
+requests>=2.26.0
+numpy>=1.21.0
+python-dotenv>=0.19.0
+tqdm>=4.65.0
+tornado>=6.1,<7.0
