@@ -10,30 +10,24 @@ def show():
     with col1:
         with st.expander("科技型中小企业", expanded=True):
             st.write("面向科技创新能力突出的中小企业的扶持政策")
-            st.button("申报详情", key="tech_sme")
+            if st.button("申报详情", key="tech_sme"):
+                show_policy_detail("科技型中小企业")
             
         with st.expander("创新型中小企业", expanded=True):
             st.write("支持具有自主创新能力和发展潜力的中小企业")
-            st.button("申报详情", key="innovative_sme")
+            if st.button("申报详情", key="innovative_sme"):
+                show_policy_detail("创新型中小企业")
     
     with col2:
         with st.expander("专精特新中小企业", expanded=True):
             st.write("针对专业化、精细化、特色化、新颖化中小企业的支持政策")
-            st.button("申报详情", key="specialized_sme")
+            if st.button("申报详情", key="specialized_sme"):
+                show_specialized_sme_evaluation()
             
         with st.expander("高新技术企业", expanded=True):
             st.write("高新技术企业认定及相关优惠政策")
-            st.button("申报详情", key="high_tech")
-
-    # 处理按钮点击事件
-    if st.session_state.get("specialized_sme", False):
-        show_specialized_sme_evaluation()
-    elif st.session_state.get("tech_sme", False):
-        show_policy_detail("科技型中小企业")
-    elif st.session_state.get("innovative_sme", False):
-        show_policy_detail("创新型中小企业")
-    elif st.session_state.get("high_tech", False):
-        show_policy_detail("高新技术企业")
+            if st.button("申报详情", key="high_tech"):
+                show_policy_detail("高新技术企业")
 
 def show_specialized_sme_evaluation():
     st.subheader("专精特新中小企业认定评估")

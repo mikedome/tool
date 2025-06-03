@@ -1,7 +1,7 @@
 import streamlit as st
 from pages import split, merge, deduplicate, convert, filter, juncai, policy
 from utils.error_handler import handle_errors
-from utils.github_sync import sync_all_files_to_github, configure_cursor_github
+from utils.github_sync import sync_all_files_to_github
 import os
 from dotenv import load_dotenv
 
@@ -36,17 +36,12 @@ def main():
     init_page()
     st.title("Ethan的工具集")
     
-    # 添加GitHub同步按钮和配置
+    # 添加GitHub同步按钮
     with st.sidebar:
         st.title("功能选择")
-        
-        # GitHub 同步部分
-        with st.expander("GitHub 同步设置"):
-            if st.button("配置 Cursor GitHub"):
-                configure_cursor_github()
-            if st.button("同步到 GitHub"):
-                with st.spinner('正在同步文件...'):
-                    sync_all_files_to_github()
+        if st.button("同步所有文件到GitHub"):
+            with st.spinner('正在同步文件...'):
+                sync_all_files_to_github()
         
         page = st.selectbox(
             "选择功能",
